@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;net8.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <PackageId>ApplyPatchV4A</PackageId>
+    <Description>Apply OpenAI V4A patch format diffs to text content</Description>
+    <PackageTags>openai;v4a;patch;diff</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ApplyPatchV4A.Tests" />
+  </ItemGroup>
+
+</Project>
