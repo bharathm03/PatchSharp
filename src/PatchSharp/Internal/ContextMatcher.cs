@@ -6,6 +6,12 @@ namespace PatchSharp.Internal;
 
 internal static class ContextMatcher
 {
+    internal const int FuzzExact = 0;
+    internal const int FuzzTrimEnd = 1;
+    internal const int FuzzTrim = 100;
+    internal const int FuzzUnicode = 1000;
+    internal const int FuzzEofFallback = 10000;
+
     public static ContextMatch FindContext(List<string> lines, List<string> context, int start, bool eof)
     {
         if (eof)
@@ -15,7 +21,7 @@ internal static class ContextMatcher
             if (endMatch.NewIndex != -1)
                 return endMatch;
             var fallback = FindContextCore(lines, context, start);
-            return new ContextMatch(fallback.NewIndex, fallback.Fuzz + 10000);
+            return new ContextMatch(fallback.NewIndex, fallback.Fuzz + FuzzEofFallback);
         }
         return FindContextCore(lines, context, start);
     }
@@ -31,14 +37,14 @@ internal static class ContextMatcher
         string trimmedAnchor = anchor.Trim();
         if (TryFindAnchor(inputLines, cursor, trimmedAnchor, s => s.Trim(), out int trimmedPos))
         {
-            fuzz += 1;
+            fuzz += FuzzTrimEnd;
             return trimmedPos;
         }
 
         string normalizedAnchor = NormalizeUnicode(trimmedAnchor);
         if (TryFindAnchor(inputLines, cursor, normalizedAnchor, s => NormalizeUnicode(s.Trim()), out int unicodePos))
         {
-            fuzz += 1000;
+            fuzz += FuzzUnicode;
             return unicodePos;
         }
 
@@ -77,28 +83,28 @@ internal static class ContextMatcher
         for (int i = start; i < lines.Count; i++)
         {
             if (EqualsSlice(lines, context, i, s => s))
-                return new ContextMatch(i, 0);
+                return new ContextMatch(i, FuzzExact);
         }
 
         // Tier 2: trimEnd
         for (int i = start; i < lines.Count; i++)
         {
             if (EqualsSlice(lines, context, i, s => s.TrimEnd()))
-                return new ContextMatch(i, 1);
+                return new ContextMatch(i, FuzzTrimEnd);
         }
 
         // Tier 3: trim
         for (int i = start; i < lines.Count; i++)
         {
             if (EqualsSlice(lines, context, i, s => s.Trim()))
-                return new ContextMatch(i, 100);
+                return new ContextMatch(i, FuzzTrim);
         }
 
         // Tier 4: Unicode normalization (smart quotes, dashes, non-breaking spaces)
         for (int i = start; i < lines.Count; i++)
         {
             if (EqualsSlice(lines, context, i, NormalizeUnicode))
-                return new ContextMatch(i, 1000);
+                return new ContextMatch(i, FuzzUnicode);
         }
 
         return new ContextMatch(-1, 0);

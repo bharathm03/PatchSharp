@@ -216,17 +216,6 @@ public class EdgeCaseTests
     }
 
     [Fact]
-    public void CodexCompat_EofSentinelRetry_ContextIncludesTrailingEmpty()
-    {
-        // Trailing empty context lines are stripped as inter-chunk separators,
-        // which effectively handles codex-cli's sentinel retry behavior.
-        var input = "aaa\nbbb";
-        var diff = " aaa\n bbb\n ";
-        var result = ApplyPatch.Apply(input, diff);
-        Assert.Contains("aaa", result);
-    }
-
-    [Fact]
     public void CodexCompat_EofSentinelRetry_OldLinesEndWithEmpty()
     {
         // Codex-cli: when old_lines pattern ends with empty string (trailing

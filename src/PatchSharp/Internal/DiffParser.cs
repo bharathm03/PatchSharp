@@ -149,10 +149,7 @@ internal static class DiffParser
 
         if (delLines.Count > 0 || insLines.Count > 0)
         {
-            sectionChunks.Add(new Chunk(
-                context.Count - delLines.Count,
-                new List<string>(delLines),
-                new List<string>(insLines)));
+            FlushChunk(sectionChunks, context, delLines, insLines);
         }
 
         // Strip trailing empty context lines — they are inter-chunk blank
