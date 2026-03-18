@@ -24,14 +24,21 @@ jobs:
       - name: Restore
         run: dotnet restore
 
+      - name: Set version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME:-0.0.0}"
+          VERSION="${TAG#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Build
-        run: dotnet build -c Release --no-restore
+        run: dotnet build -c Release --no-restore -p:Version=${{ steps.version.outputs.VERSION }}
 
       - name: Test
         run: dotnet test -c Release --no-build
 
       - name: Pack
-        run: dotnet pack src/PatchSharp/PatchSharp.csproj -c Release --no-build -o artifacts
+        run: dotnet pack src/PatchSharp/PatchSharp.csproj -c Release --no-build -o artifacts -p:Version=${{ steps.version.outputs.VERSION }}
 
       - name: NuGet login (OIDC trusted publishing)
         uses: NuGet/login@v1

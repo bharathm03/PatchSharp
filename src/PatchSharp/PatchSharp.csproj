@@ -9,10 +9,15 @@
     <Description>Apply patch format diffs to text content (V4A and StrReplace formats)</Description>
     <PackageTags>openai;v4a;str-replace;patch;diff</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="PatchSharp.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
