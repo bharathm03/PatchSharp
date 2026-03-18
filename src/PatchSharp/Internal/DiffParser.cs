@@ -114,7 +114,14 @@ internal static class DiffParser
             char prefix = line[0];
 
             if (prefix != '+' && prefix != '-' && prefix != ' ')
-                throw new PatchApplyException($"Invalid Line: {line}", lineNumber: index);
+            {
+                // Per codex-cli: if we've already parsed lines, break out
+                // (assume start of next hunk). If first line, error.
+                if (index - 1 == startIndex)
+                    throw new PatchApplyException($"Invalid Line: {line}", lineNumber: index);
+                index--; // Back up so the outer loop can re-process this line
+                break;
+            }
 
             mode = prefix;
             string lineContent = line.Substring(1);
@@ -146,6 +153,17 @@ internal static class DiffParser
                 context.Count - delLines.Count,
                 new List<string>(delLines),
                 new List<string>(insLines)));
+        }
+
+        // Strip trailing empty context lines — they are inter-chunk blank
+        // separators in the diff text, not real context (matches codex-cli).
+        // Guard: only strip while context.Count exceeds the last chunk's
+        // OrigIndex, since OrigIndex is a 0-based offset into context and
+        // removing lines at or below it would invalidate chunk positions.
+        while (context.Count > 0 && context[context.Count - 1] == ""
+               && (sectionChunks.Count == 0 || context.Count > sectionChunks[sectionChunks.Count - 1].OrigIndex))
+        {
+            context.RemoveAt(context.Count - 1);
         }
 
         if (index < lines.Count && lines[index] == EndFile)
@@ -181,6 +199,25 @@ internal static class DiffParser
 
         while (!IsDone(allLines, index, EndSectionMarkers))
         {
+            // Skip non-parseable lines between sections: blank lines are formatting
+            // artifacts, unprefixed non-empty lines are garbage from broken hunks.
+            // Per codex-cli, both should be silently skipped between sections.
+            // Note: ReadSection also breaks out on unprefixed lines (backing up
+            // the index), so this loop handles the line that ReadSection yielded.
+            while (index < allLines.Count
+                   && !IsDone(allLines, index, EndSectionMarkers)
+                   && !allLines[index].StartsWith("@@"))
+            {
+                var skipped = allLines[index];
+                bool isValidDiffLine = skipped.Length > 0
+                    && (skipped[0] == '+' || skipped[0] == '-' || skipped[0] == ' ');
+                if (isValidDiffLine)
+                    break; // This is a real diff line (first chunk without @@)
+                index++;
+            }
+            if (IsDone(allLines, index, EndSectionMarkers))
+                break;
+
             // Read anchor
             string anchor = "";
             if (index < allLines.Count && allLines[index].StartsWith("@@ "))
@@ -218,13 +255,52 @@ internal static class DiffParser
                     fuzz: fuzz, context: ctxText);
             }
 
-            cursor = findResult.NewIndex + section.NextContext.Count;
+            // Per codex-cli: if the last chunk's del lines end with an empty
+            // string (trailing-newline sentinel from Split) and that would
+            // overflow the input, trim the sentinel from both del and ins lines.
+            if (section.SectionChunks.Count > 0)
+            {
+                var lastChunk = section.SectionChunks[section.SectionChunks.Count - 1];
+                if (lastChunk.DelLines.Count > 0
+                    && lastChunk.DelLines[lastChunk.DelLines.Count - 1] == "")
+                {
+                    int chunkStart = findResult.NewIndex + lastChunk.OrigIndex;
+                    if (chunkStart + lastChunk.DelLines.Count > inputLines.Count)
+                    {
+                        lastChunk.DelLines.RemoveAt(lastChunk.DelLines.Count - 1);
+                        if (lastChunk.InsLines.Count > 0
+                            && lastChunk.InsLines[lastChunk.InsLines.Count - 1] == "")
+                        {
+                            lastChunk.InsLines.RemoveAt(lastChunk.InsLines.Count - 1);
+                        }
+                    }
+                }
+            }
+
+            // Pure addition: all chunks are insert-only with no deletions and
+            // no context lines to anchor against.  Per codex-cli, insert at EOF.
+            bool isPureAddition = section.NextContext.Count == 0
+                && section.SectionChunks.Count > 0
+                && section.SectionChunks.TrueForAll(c => c.DelLines.Count == 0);
+
+            // Don't advance cursor for pure additions — they append to EOF
+            // without consuming any file content, so subsequent hunks must
+            // still match against the original content from the current cursor.
+            if (!isPureAddition)
+                cursor = findResult.NewIndex + section.NextContext.Count;
             fuzz += findResult.Fuzz;
             index = section.EndIndex;
 
             foreach (var ch in section.SectionChunks)
             {
-                ch.OrigIndex += findResult.NewIndex;
+                if (isPureAddition)
+                {
+                    ch.InsertAtEnd = true;
+                }
+                else
+                {
+                    ch.OrigIndex += findResult.NewIndex;
+                }
                 chunks.Add(ch);
             }
         }

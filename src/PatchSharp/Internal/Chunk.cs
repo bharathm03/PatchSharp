@@ -7,6 +7,12 @@ internal sealed class Chunk
     public int OrigIndex { get; set; }
     public List<string> DelLines { get; }
     public List<string> InsLines { get; }
+    /// <summary>
+    /// When true, this chunk's insertion point is resolved at apply time
+    /// to the current end of the file (after preceding chunks have been applied).
+    /// Used for pure-addition hunks per codex-cli V4A spec.
+    /// </summary>
+    public bool InsertAtEnd { get; set; }
 
     public Chunk(int origIndex, List<string> delLines, List<string> insLines)
     {

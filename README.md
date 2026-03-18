@@ -1,6 +1,6 @@
 # PatchSharp
 
-A C# library for applying text diffs and replacements with built-in fuzzy matching. Supports [OpenAI's V4A patch format](https://cookbook.openai.com/examples/gpt4-1_prompting_guide#v4a-diff-format) and Anthropic-style `str_replace` operations.
+A C# library for applying text diffs and replacements with built-in fuzzy matching. Supports OpenAI's V4A patch format and Anthropic-style `str_replace` operations.
 
 ## Installation
 

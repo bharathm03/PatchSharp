@@ -22,7 +22,7 @@ internal static class ContextMatcher
 
     public static int AdvanceCursorToAnchor(string anchor, List<string> inputLines, int cursor, ref int fuzz)
     {
-        // Try exact match first, then trimmed match
+        // Try exact match first, then trimmed, then unicode-normalized
         if (TryFindAnchor(inputLines, cursor, anchor, s => s, out int exactPos))
         {
             return exactPos;
@@ -33,6 +33,13 @@ internal static class ContextMatcher
         {
             fuzz += 1;
             return trimmedPos;
+        }
+
+        string normalizedAnchor = NormalizeUnicode(trimmedAnchor);
+        if (TryFindAnchor(inputLines, cursor, normalizedAnchor, s => NormalizeUnicode(s.Trim()), out int unicodePos))
+        {
+            fuzz += 1000;
+            return unicodePos;
         }
 
         return cursor;
@@ -119,6 +126,7 @@ internal static class ContextMatcher
                 case '\u2018': // LEFT SINGLE QUOTATION MARK
                 case '\u2019': // RIGHT SINGLE QUOTATION MARK
                 case '\u201A': // SINGLE LOW-9 QUOTATION MARK
+                case '\u201B': // SINGLE HIGH-REVERSED-9 QUOTATION MARK
                 case '\u2039': // SINGLE LEFT-POINTING ANGLE QUOTATION MARK
                 case '\u203A': // SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
                 case '\u0060': // GRAVE ACCENT (backtick often used as quote)
@@ -133,13 +141,31 @@ internal static class ContextMatcher
                     sb.Append('"');
                     break;
                 // Dashes → -
+                case '\u2010': // HYPHEN
+                case '\u2011': // NON-BREAKING HYPHEN
+                case '\u2012': // FIGURE DASH
                 case '\u2013': // EN DASH
                 case '\u2014': // EM DASH
+                case '\u2015': // HORIZONTAL BAR
                 case '\u2212': // MINUS SIGN
                     sb.Append('-');
                     break;
-                // Non-breaking space → space
+                // Various spaces → ASCII space
                 case '\u00A0': // NO-BREAK SPACE
+                case '\u2000': // EN QUAD
+                case '\u2001': // EM QUAD
+                case '\u2002': // EN SPACE
+                case '\u2003': // EM SPACE
+                case '\u2004': // THREE-PER-EM SPACE
+                case '\u2005': // FOUR-PER-EM SPACE
+                case '\u2006': // SIX-PER-EM SPACE
+                case '\u2007': // FIGURE SPACE
+                case '\u2008': // PUNCTUATION SPACE
+                case '\u2009': // THIN SPACE
+                case '\u200A': // HAIR SPACE
+                case '\u202F': // NARROW NO-BREAK SPACE
+                case '\u205F': // MEDIUM MATHEMATICAL SPACE
+                case '\u3000': // IDEOGRAPHIC SPACE
                     sb.Append(' ');
                     break;
                 default:
