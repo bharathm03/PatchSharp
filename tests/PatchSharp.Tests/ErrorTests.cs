@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace ApplyPatch.Tests;
+namespace PatchSharp.Tests;
 
 public class ErrorTests
 {

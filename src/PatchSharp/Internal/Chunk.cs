@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace ApplyPatch.Internal;
+namespace PatchSharp.Internal;
 
 internal sealed class Chunk
 {

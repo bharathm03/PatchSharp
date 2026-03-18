@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using ApplyPatch.Internal;
+using PatchSharp.Internal;
 using Xunit;
 
-namespace ApplyPatch.Tests;
+namespace PatchSharp.Tests;
 
 public class FuzzyMatchingTests
 {

@@ -2,7 +2,7 @@
 using System;
 using System.Text.RegularExpressions;
 
-namespace ApplyPatch.Tests;
+namespace PatchSharp.Tests;
 
 public class StrReplaceTests
 {

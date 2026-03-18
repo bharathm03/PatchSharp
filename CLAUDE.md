@@ -13,22 +13,33 @@ dotnet test --filter "FuzzyMatchingTests"              # Run all tests in a clas
 
 ## Architecture
 
-C# library that applies OpenAI's V4A patch format diffs to text. Multi-targets `netstandard2.1`, `net8.0`, `net10.0`.
+C# library that applies OpenAI's V4A patch format diffs and Anthropic-style str_replace operations to text. Multi-targets `netstandard2.1`, `net8.0`, `net10.0`. NuGet package: **PatchSharp**.
 
 ### Public API
 
-Two static methods on `ApplyPatchV4A.ApplyPatch`:
+Three static methods on `PatchSharp.ApplyPatch`:
 - `Create(string diff)` — builds new file content from a diff where every line is `+`-prefixed
 - `Apply(string input, string diff)` — applies a V4A diff to existing text
+- `StrReplace(string input, string oldStr, string newStr, bool allowMulti = false, bool useRegex = false)` — find-and-replace with 4-tier fuzzy matching; `allowMulti` replaces all occurrences; `useRegex` uses .NET regex instead of fuzzy matching
 
 Throws `PatchApplyException` (with `LineNumber`, `Fuzz`, `Context` properties) on failure.
 
 ### Internal Pipeline
 
+**V4A Apply path:**
 ```
 Input → NewlineHelper (detect/normalize to LF)
       → DiffParser (parse diff into sections, handle anchors and markers)
         → ContextMatcher (locate where each section applies via fuzzy matching)
+      → ChunkApplier (apply chunks in reverse order)
+      → NewlineHelper (restore original line endings)
+      → Output
+```
+
+**StrReplace path:**
+```
+Input → NewlineHelper (detect/normalize to LF)
+      → StrReplaceParser (find matches via ContextMatcher fuzzy tiers, substring, or regex)
       → ChunkApplier (apply chunks in reverse order)
       → NewlineHelper (restore original line endings)
       → Output
@@ -40,11 +51,12 @@ Input → NewlineHelper (detect/normalize to LF)
 - **Unicode normalization** converts smart quotes, em-dashes, and non-breaking spaces to ASCII equivalents for matching.
 - **Anchors** (`@@ text`): advance the search cursor to a specific line in the input.
 - **`*** End of File`**: searches backward from the end of the file.
+- **StrReplace fallback**: line-level fuzzy matching → character-level substring → error. Regex path bypasses fuzzy matching entirely.
 
 ### Project Layout
 
-- `src/ApplyPatchV4A/` — library (public: `ApplyPatch`, `PatchApplyException`; internal: `Internal/` folder)
-- `tests/ApplyPatchV4A.Tests/` — xUnit tests, one class per feature area
+- `src/PatchSharp/` — library (public: `ApplyPatch`, `PatchApplyException`; internal: `Internal/` folder)
+- `tests/PatchSharp.Tests/` — xUnit tests, one class per feature area
 - Tests use `[InternalsVisibleTo]` to access internal types directly
 
 ### V4A Diff Format

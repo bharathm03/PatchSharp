@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ApplyPatch\ApplyPatch.csproj" />
+    <ProjectReference Include="..\..\src\PatchSharp\PatchSharp.csproj" />
   </ItemGroup>
 
 </Project>

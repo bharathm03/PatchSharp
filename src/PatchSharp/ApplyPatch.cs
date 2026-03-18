@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ApplyPatch.Internal;
+using PatchSharp.Internal;
 
-namespace ApplyPatch;
+namespace PatchSharp;
 
 public static class ApplyPatch
 {

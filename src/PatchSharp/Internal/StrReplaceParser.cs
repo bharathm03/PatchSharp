@@ -1,9 +1,9 @@
-// src/ApplyPatch/Internal/StrReplaceParser.cs
+// src/PatchSharp/Internal/StrReplaceParser.cs
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace ApplyPatch.Internal;
+namespace PatchSharp.Internal;
 
 internal static class StrReplaceParser
 {

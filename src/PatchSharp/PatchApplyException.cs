@@ -1,4 +1,4 @@
-namespace ApplyPatch;
+namespace PatchSharp;
 
 using System;
 

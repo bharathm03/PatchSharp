@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PatchSharp/PatchSharp.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PatchSharp.Tests/PatchSharp.Tests.csproj" />
+  </Folder>
+</Solution>

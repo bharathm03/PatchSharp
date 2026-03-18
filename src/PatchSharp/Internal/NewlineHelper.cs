@@ -1,4 +1,4 @@
-namespace ApplyPatch.Internal;
+namespace PatchSharp.Internal;
 
 internal static class NewlineHelper
 {
