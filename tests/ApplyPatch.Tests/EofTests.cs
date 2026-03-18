@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace ApplyPatchV4A.Tests;
+namespace ApplyPatch.Tests;
 
 public class EofTests
 {

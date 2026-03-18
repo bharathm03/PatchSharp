@@ -1,8 +1,8 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/ApplyPatchV4A/ApplyPatchV4A.csproj" />
+    <Project Path="src/ApplyPatch/ApplyPatch.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/ApplyPatchV4A.Tests/ApplyPatchV4A.Tests.csproj" />
+    <Project Path="tests/ApplyPatch.Tests/ApplyPatch.Tests.csproj" />
   </Folder>
 </Solution>

@@ -5,14 +5,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
-    <PackageId>ApplyPatchV4A</PackageId>
-    <Description>Apply OpenAI V4A patch format diffs to text content</Description>
-    <PackageTags>openai;v4a;patch;diff</PackageTags>
+    <PackageId>ApplyPatch</PackageId>
+    <Description>Apply patch format diffs to text content (V4A and StrReplace formats)</Description>
+    <PackageTags>openai;v4a;str-replace;patch;diff</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="ApplyPatchV4A.Tests" />
+    <InternalsVisibleTo Include="ApplyPatch.Tests" />
   </ItemGroup>
 
 </Project>

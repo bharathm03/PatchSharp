@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ApplyPatchV4A.Internal;
+namespace ApplyPatch.Internal;
 
 internal static class ContextMatcher
 {

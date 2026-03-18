@@ -1,4 +1,4 @@
-namespace ApplyPatchV4A;
+namespace ApplyPatch;
 
 using System;
 

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace ApplyPatchV4A.Internal;
+namespace ApplyPatch.Internal;
 
 internal static class ChunkApplier
 {
