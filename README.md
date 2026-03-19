@@ -1,5 +1,10 @@
 # PatchSharp
 
+[![CI](https://github.com/Radha-AI-Products/ApplyPatchV4A/actions/workflows/ci.yml/badge.svg)](https://github.com/Radha-AI-Products/ApplyPatchV4A/actions/workflows/ci.yml)
+[![NuGet](https://img.shields.io/nuget/v/PatchSharp.svg)](https://www.nuget.org/packages/PatchSharp)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/PatchSharp.svg)](https://www.nuget.org/packages/PatchSharp)
+[![codecov](https://codecov.io/gh/Radha-AI-Products/ApplyPatchV4A/branch/main/graph/badge.svg)](https://codecov.io/gh/Radha-AI-Products/ApplyPatchV4A)
+
 A C# library for applying text diffs and replacements with built-in fuzzy matching. Supports OpenAI's V4A patch format and Anthropic-style `str_replace` operations.
 
 ## Installation
