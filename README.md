@@ -115,6 +115,14 @@ The lowest fuzz level that produces a match wins.
 
 Wrapped in optional `*** Begin Patch` / `*** End Patch` markers.
 
+## Origin
+
+PatchSharp was extracted from [Instruct UI](https://instructui.com), an AI-powered platform
+that generates production-ready Blazor UI code from text descriptions and screenshots.
+These patching and replacement algorithms are battle-tested across thousands of AI-generated
+code edits in Instruct UI's multi-agent workflow, where reliable diff application is critical
+for compiling and rendering live previews.
+
 ## License
 
 MIT
