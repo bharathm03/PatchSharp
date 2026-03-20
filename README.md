@@ -98,6 +98,7 @@ When an exact match isn't found, PatchSharp tries progressively looser matching:
 | 0 | Exact match |
 | 1 | Ignore trailing whitespace |
 | 100 | Ignore leading and trailing whitespace |
+| 500 | Skip blank lines (handles AI models omitting blank lines from diff context) |
 | 1000 | Unicode normalization (smart quotes → ASCII quotes, em-dashes → hyphens, etc.) |
 
 The lowest fuzz level that produces a match wins.
