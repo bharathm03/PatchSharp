@@ -114,4 +114,95 @@ public class FuzzyMatchingTests
         Assert.Equal(0, result.NewIndex);
         Assert.Equal(1000, result.Fuzz);
     }
+
+    [Fact]
+    public void FindContext_SkipsBlankLines_WhenContextOmitsThem()
+    {
+        // File has blank lines between properties, context does not
+        var lines = new List<string>
+        {
+            "    [StringLength(100)]",
+            "    public string Company { get; set; } = string.Empty;",
+            "",
+            "    [Required]",
+            "    [StringLength(1000, MinimumLength = 20)]",
+            "    public string Message { get; set; } = string.Empty;",
+        };
+        var context = new List<string>
+        {
+            "    [StringLength(100)]",
+            "    public string Company { get; set; } = string.Empty;",
+            "    [Required]",
+            "    [StringLength(1000, MinimumLength = 20)]",
+            "    public string Message { get; set; } = string.Empty;",
+        };
+        var result = ContextMatcher.FindContext(lines, context, 0, eof: false);
+        Assert.Equal(0, result.NewIndex);
+        Assert.Equal(ContextMatcher.FuzzSkipBlankLines, result.Fuzz);
+    }
+
+    [Fact]
+    public void FindContext_SkipsMultipleBlankLines()
+    {
+        var lines = new List<string>
+        {
+            "aaa",
+            "",
+            "",
+            "bbb",
+            "",
+            "ccc",
+        };
+        var context = new List<string> { "aaa", "bbb", "ccc" };
+        var result = ContextMatcher.FindContext(lines, context, 0, eof: false);
+        Assert.Equal(0, result.NewIndex);
+        Assert.Equal(ContextMatcher.FuzzSkipBlankLines, result.Fuzz);
+    }
+
+    [Fact]
+    public void FindContext_SkipBlankLines_RespectsStartOffset()
+    {
+        var lines = new List<string>
+        {
+            "aaa",
+            "",
+            "bbb",
+            "xxx",
+            "aaa",
+            "",
+            "bbb",
+        };
+        var context = new List<string> { "aaa", "bbb" };
+        var result = ContextMatcher.FindContext(lines, context, 3, eof: false);
+        Assert.Equal(4, result.NewIndex);
+        Assert.Equal(ContextMatcher.FuzzSkipBlankLines, result.Fuzz);
+    }
+
+    [Fact]
+    public void FindContext_PrefersExactOverSkipBlankLines()
+    {
+        // Exact match exists — should not use blank-line skipping
+        var lines = new List<string> { "aaa", "bbb", "ccc" };
+        var context = new List<string> { "aaa", "bbb", "ccc" };
+        var result = ContextMatcher.FindContext(lines, context, 0, eof: false);
+        Assert.Equal(0, result.NewIndex);
+        Assert.Equal(ContextMatcher.FuzzExact, result.Fuzz);
+    }
+
+    [Fact]
+    public void FindContext_SkipBlankLines_WithTrailingWhitespace()
+    {
+        // Both blank lines missing AND trailing whitespace differences
+        var lines = new List<string>
+        {
+            "aaa  ",
+            "",
+            "bbb\t",
+            "ccc",
+        };
+        var context = new List<string> { "aaa", "bbb", "ccc" };
+        var result = ContextMatcher.FindContext(lines, context, 0, eof: false);
+        Assert.Equal(0, result.NewIndex);
+        Assert.Equal(ContextMatcher.FuzzSkipBlankLines, result.Fuzz);
+    }
 }

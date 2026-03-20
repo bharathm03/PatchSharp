@@ -23,7 +23,10 @@ internal static class StrReplaceParser
             var match = ContextMatcher.FindContext(inputLines, oldLines, start, eof: false);
             if (match.NewIndex == -1) break;
             results.Add(match);
-            start = match.NewIndex + oldLines.Count;
+            if (match.IndexMap != null)
+                start = match.IndexMap[oldLines.Count - 1] + 1;
+            else
+                start = match.NewIndex + oldLines.Count;
             // String.Split always returns >= 1 element, so oldLines.Count >= 1 and
             // start always advances — no infinite-loop risk even for empty oldStr.
         }

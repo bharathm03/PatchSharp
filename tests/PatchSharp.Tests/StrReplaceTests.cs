@@ -292,4 +292,13 @@ public class StrReplaceTests
         var result = ApplyPatch.StrReplace(input, "Line1  \nLine2  \nLine3  ", "A\nB\nC");
         Assert.Equal("A\nB\nC", result);
     }
+
+    [Fact]
+    public void StrReplace_SkipsBlankLines_ReplacesFullSpan()
+    {
+        // File has blank lines between blocks, oldStr omits them
+        var input = "aaa\n\nbbb\nccc";
+        var result = ApplyPatch.StrReplace(input, "aaa\nbbb", "AAA\nBBB");
+        Assert.Equal("AAA\nBBB\nccc", result);
+    }
 }

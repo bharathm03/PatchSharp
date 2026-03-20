@@ -38,10 +38,22 @@ internal readonly struct ContextMatch
 {
     public int NewIndex { get; }
     public int Fuzz { get; }
+    /// <summary>
+    /// Maps context index to file index. Non-null only when blank-line-skipping matched.
+    /// </summary>
+    public int[]? IndexMap { get; }
 
     public ContextMatch(int newIndex, int fuzz)
     {
         NewIndex = newIndex;
         Fuzz = fuzz;
+        IndexMap = null;
+    }
+
+    public ContextMatch(int newIndex, int fuzz, int[] indexMap)
+    {
+        NewIndex = newIndex;
+        Fuzz = fuzz;
+        IndexMap = indexMap;
     }
 }

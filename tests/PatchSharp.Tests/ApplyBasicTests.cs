@@ -83,4 +83,53 @@ public class ApplyBasicTests
         var result = ApplyPatch.Create(diff);
         Assert.Equal("hello\nworld", result);
     }
+
+    [Fact]
+    public void Apply_SkipsBlankLines_SimpleReplacement()
+    {
+        // File has blank lines between blocks, diff context omits them
+        var input =
+            "    [StringLength(100)]\n" +
+            "    public string Company { get; set; } = string.Empty;\n" +
+            "\n" +
+            "    [Required]\n" +
+            "    [StringLength(1000, MinimumLength = 20)]\n" +
+            "    public string Message { get; set; } = string.Empty;";
+        // Diff context omits the blank line between Company and [Required]
+        var diff =
+            "     [StringLength(100)]\n" +
+            "     public string Company { get; set; } = string.Empty;\n" +
+            "-    [Required]\n" +
+            "+    [Required, MaxLength(50)]\n" +
+            "     [StringLength(1000, MinimumLength = 20)]\n" +
+            "     public string Message { get; set; } = string.Empty;";
+        var result = ApplyPatch.Apply(input, diff);
+        var expected =
+            "    [StringLength(100)]\n" +
+            "    public string Company { get; set; } = string.Empty;\n" +
+            "\n" +
+            "    [Required, MaxLength(50)]\n" +
+            "    [StringLength(1000, MinimumLength = 20)]\n" +
+            "    public string Message { get; set; } = string.Empty;";
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void Apply_SkipsBlankLines_InsertLine()
+    {
+        // File has blank line, diff context omits it
+        var input = "aaa\n\nbbb\nccc";
+        var diff = " aaa\n bbb\n+inserted\n ccc";
+        var result = ApplyPatch.Apply(input, diff);
+        Assert.Equal("aaa\n\nbbb\ninserted\nccc", result);
+    }
+
+    [Fact]
+    public void Apply_SkipsBlankLines_DeleteLine()
+    {
+        var input = "aaa\n\nbbb\nccc";
+        var diff = " aaa\n-bbb\n ccc";
+        var result = ApplyPatch.Apply(input, diff);
+        Assert.Equal("aaa\n\nccc", result);
+    }
 }

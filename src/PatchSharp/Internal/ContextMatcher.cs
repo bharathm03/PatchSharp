@@ -9,6 +9,7 @@ internal static class ContextMatcher
     internal const int FuzzExact = 0;
     internal const int FuzzTrimEnd = 1;
     internal const int FuzzTrim = 100;
+    internal const int FuzzSkipBlankLines = 500;
     internal const int FuzzUnicode = 1000;
     internal const int FuzzEofFallback = 10000;
 
@@ -100,7 +101,14 @@ internal static class ContextMatcher
                 return new ContextMatch(i, FuzzTrim);
         }
 
-        // Tier 4: Unicode normalization (smart quotes, dashes, non-breaking spaces)
+        // Tier 4: skip blank lines in source (context omits blank lines that exist in file)
+        for (int i = start; i < lines.Count; i++)
+        {
+            if (MatchSkippingBlankLines(lines, context, i, out _, out int[]? indexMap))
+                return new ContextMatch(i, FuzzSkipBlankLines, indexMap!);
+        }
+
+        // Tier 5: Unicode normalization (smart quotes, dashes, non-breaking spaces)
         for (int i = start; i < lines.Count; i++)
         {
             if (EqualsSlice(lines, context, i, NormalizeUnicode))
@@ -108,6 +116,39 @@ internal static class ContextMatcher
         }
 
         return new ContextMatch(-1, 0);
+    }
+
+    internal static bool MatchSkippingBlankLines(List<string> source, List<string> target, int start, out int spanLength, out int[]? indexMap)
+    {
+        spanLength = 0;
+        indexMap = null;
+        int si = start;
+        int ci = 0;
+        bool skippedAny = false;
+        var map = new int[target.Count];
+
+        while (ci < target.Count && si < source.Count)
+        {
+            if (string.IsNullOrWhiteSpace(source[si]) && !string.IsNullOrWhiteSpace(target[ci]))
+            {
+                si++;
+                skippedAny = true;
+                continue;
+            }
+            if (source[si] != target[ci] && source[si].TrimEnd() != target[ci].TrimEnd())
+                return false;
+            map[ci] = si;
+            si++;
+            ci++;
+        }
+
+        if (ci == target.Count && skippedAny)
+        {
+            spanLength = si - start;
+            indexMap = map;
+            return true;
+        }
+        return false;
     }
 
     private static bool EqualsSlice(List<string> source, List<string> target, int start, Func<string, string> mapFn)

@@ -34,7 +34,7 @@ public static class ApplyPatch
     /// Apply an Anthropic-style str_replace operation to existing text content.
     /// </summary>
     /// <param name="input">The original text content.</param>
-    /// <param name="oldStr">The text to find. Matched using 4-tier fuzzy matching when <paramref name="useRegex"/> is false.</param>
+    /// <param name="oldStr">The text to find. Matched using 5-tier fuzzy matching when <paramref name="useRegex"/> is false.</param>
     /// <param name="newStr">The replacement text. Always treated as a literal string (no capture group substitution).</param>
     /// <param name="allowMulti">When false (default), throws if <paramref name="oldStr"/> matches more than once. When true, replaces all occurrences.</param>
     /// <param name="useRegex">When true, <paramref name="oldStr"/> is a .NET regex pattern. Fuzzy matching is skipped.</param>
@@ -86,7 +86,10 @@ public static class ApplyPatch
         var chunks = new List<Chunk>();
         foreach (var match in matches)
         {
-            var delLines = inputLines.GetRange(match.NewIndex, oldLines.Count);
+            int span = match.IndexMap != null
+                ? match.IndexMap[oldLines.Count - 1] - match.NewIndex + 1
+                : oldLines.Count;
+            var delLines = inputLines.GetRange(match.NewIndex, span);
             chunks.Add(new Chunk(match.NewIndex, delLines, insLines));
         }
 

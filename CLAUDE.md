@@ -47,7 +47,7 @@ Input → NewlineHelper (detect/normalize to LF)
 
 **Key design decisions:**
 - **Reverse-order application**: Chunks apply bottom-to-top so earlier indices stay valid.
-- **4-tier fuzzy matching**: exact (fuzz=0) → trimEnd (fuzz=1) → trim (fuzz=100) → Unicode normalization (fuzz=1000). Lowest fuzz wins.
+- **5-tier fuzzy matching**: exact (fuzz=0) → trimEnd (fuzz=1) → trim (fuzz=100) → skip blank lines (fuzz=500) → Unicode normalization (fuzz=1000). Lowest fuzz wins.
 - **Unicode normalization** converts smart quotes, em-dashes, and non-breaking spaces to ASCII equivalents for matching.
 - **Anchors** (`@@ text`): advance the search cursor to a specific line in the input.
 - **`*** End of File`**: searches backward from the end of the file.

@@ -284,7 +284,18 @@ internal static class DiffParser
             // without consuming any file content, so subsequent hunks must
             // still match against the original content from the current cursor.
             if (!isPureAddition)
-                cursor = findResult.NewIndex + section.NextContext.Count;
+            {
+                if (findResult.IndexMap != null)
+                {
+                    // Blank-line-skipping: cursor must account for actual file span
+                    int lastContextIdx = section.NextContext.Count - 1;
+                    cursor = findResult.IndexMap[lastContextIdx] + 1;
+                }
+                else
+                {
+                    cursor = findResult.NewIndex + section.NextContext.Count;
+                }
+            }
             fuzz += findResult.Fuzz;
             index = section.EndIndex;
 
@@ -293,6 +304,11 @@ internal static class DiffParser
                 if (isPureAddition)
                 {
                     ch.InsertAtEnd = true;
+                }
+                else if (findResult.IndexMap != null)
+                {
+                    // Blank-line-skipping: map context-relative index to actual file index
+                    ch.OrigIndex = findResult.IndexMap[ch.OrigIndex];
                 }
                 else
                 {
